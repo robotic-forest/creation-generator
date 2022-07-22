@@ -1,0 +1,11 @@
+{
+  "name": "creation-generator",
+  "version": "0.0.1",
+  "description": "An attempt to process world-information to create new forms with mystical cyber-alchemy",
+  "main": "invocation.js",
+  "author": "Solomon Abramelin <roboticforest@protonmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.27.2"
+  }
+}
