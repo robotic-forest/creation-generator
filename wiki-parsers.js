@@ -1,3 +1,5 @@
+const chalk = require('chalk')
+
 const getRandomSentenceStartMiddleEnd = ({ rawParagraphs }) => {
   // Remove everything after See also
   const seeAlsoIndex = rawParagraphs.indexOf(rawParagraphs.find(p => p === '== See also =='))
@@ -37,6 +39,33 @@ const getRandomSentenceStartMiddleEnd = ({ rawParagraphs }) => {
   }
 }
 
+const firstAndRandomParagraph = ({ rawParagraphs }) => {
+  const seeAlsoIndex = rawParagraphs.indexOf(rawParagraphs.find(p => p === '== See also =='))
+  const paragraphs = rawParagraphs.slice(0, seeAlsoIndex)
+
+  const nonTitleParagraphs = paragraphs.filter(p => p.slice(0, 2) !== '==')
+  const firstParagraph = nonTitleParagraphs[0]
+  const randomParagraph = nonTitleParagraphs[Math.floor(Math.random() * nonTitleParagraphs.length)]
+
+  console.log(firstParagraph + '\n\n' + randomParagraph)
+}
+
+const firstSentencesAll = ({ rawParagraphs }) => {
+  const seeAlsoIndex = rawParagraphs.indexOf(rawParagraphs.find(p => p === '== See also =='))
+  const paragraphs = rawParagraphs.slice(0, seeAlsoIndex)
+
+  paragraphs.map(p => {
+    if (p.slice(0, 2) === '==') {
+      console.log(chalk.green('\n' + p.replaceAll('=', '').trim()))
+    } else {
+      console.log(p.split('. ')[0].trim() + '.')
+    }
+  })
+
+}
+
 module.exports = {
-  getRandomSentenceStartMiddleEnd
+  getRandomSentenceStartMiddleEnd,
+  firstAndRandomParagraph,
+  firstSentencesAll
 }
