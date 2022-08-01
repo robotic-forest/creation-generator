@@ -1,4 +1,5 @@
 const chalk = require('chalk')
+const { toSpeech } = require('./text-to-speech,js')
 
 const getRandomSentenceStartMiddleEnd = ({ rawParagraphs }) => {
   // Remove everything after See also
@@ -54,13 +55,21 @@ const firstSentencesAll = ({ rawParagraphs }) => {
   const seeAlsoIndex = rawParagraphs.indexOf(rawParagraphs.find(p => p === '== See also =='))
   const paragraphs = rawParagraphs.slice(0, seeAlsoIndex)
 
-  paragraphs.map(p => {
+  const sentences = paragraphs.map(p => {
     if (p.slice(0, 2) === '==') {
-      console.log(chalk.green('\n' + p.replaceAll('=', '').trim()))
+      const title = p.replaceAll('=', '').trim()
+      // console.log(chalk.green('\n' + title))
     } else {
-      console.log(p.split('. ')[0].trim() + '.')
+      const sentence = p.split('. ')[0].trim() + '.'
+      // console.log(sentence)
+      return sentence
     }
-  })
+  }).filter(s => !!s)
+
+  const payload = sentences.slice(0, 3)
+  
+  console.log(payload)
+  toSpeech({ sentences: payload })
 
 }
 
