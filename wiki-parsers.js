@@ -1,4 +1,5 @@
 const chalk = require('chalk')
+const axios = require('axios')
 const { toSpeech } = require('./text-to-speech,js')
 
 const getRandomSentenceStartMiddleEnd = ({ rawParagraphs }) => {
@@ -73,8 +74,27 @@ const firstSentencesAll = ({ rawParagraphs }) => {
 
 }
 
+const wikiParser = async () => {
+  const url = 'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts' +
+  '&exlimit=max&explaintext&titles=Tl%C4%81loc'
+  
+  const result = await axios.get(url)
+
+  if (result.data.query) {
+    const rawParagraphs = Object.values(result.data.query.pages)[0].extract
+      .split('\n').filter(p => !!p)
+
+    firstSentencesAll({ rawParagraphs })
+
+  } else {
+    console.log(result)
+    console.log('There was an inglorious error!')
+  }
+}
+
 module.exports = {
   getRandomSentenceStartMiddleEnd,
   firstAndRandomParagraph,
-  firstSentencesAll
+  firstSentencesAll,
+  wikiParser
 }
