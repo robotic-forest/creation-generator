@@ -7,15 +7,18 @@ const open = require('open')
 var sizeOf = require('image-size')
 const fsExtra = require('fs-extra')
 
-const imageSearch = searchTerms => {
+const imageSearch = async searchTerms => {
+  if (!searchTerms) {
+    console.log('Required 1 arg: Array of search terms')
+    return
+  }
 
   const imgurl = `https://www.google.com/search?q=${searchTerms.join('+')}` +
     `&tbm=isch&ved=2ahUKEwj9hZiGman5AhVFkWoFHXGVABQQ2-cCegQIABAA&oq=` +
     searchTerms.join('+') +
     '&gs_lcp=CgNpbWcQAzIECCMQJ1C8C1jWPmDjQmgBcAB4AIABqQeIAbMKkgEFNi42LTGYAQCgAQGqAQtnd3Mtd2l6LWltZ8ABAQ&sclient=img&ei=36PpYr2aMsWiqtsP8aqCoAE&bih=1087&biw=1905&hl=en'
-  console.log(imgurl)
 
-  const imgsearch = await request.get({ uri: imgurl || 'https://www.google.com/search?q=Animals%3B+archaeological%3B+civilization%3B+Mesopotamia%3B++prehistoric%3B+symbiotic&tbm=isch&ved=2ahUKEwjS3sqy56j5AhU-gmoFHXuwAZMQ2-cCegQIABAA&oq=Animals%3B+archaeological%3B+civilization%3B+Mesopotamia%3B++prehistoric%3B+symbiotic&gs_lcp=CgNpbWcQA1DeDVjeDWCHF2gAcAB4AIABQogBQpIBATGYAQCgAQGqAQtnd3Mtd2l6LWltZ8ABAQ&sclient=img&ei=z2_pYpK7Cb6EqtsP--CGmAk&bih=1102&biw=1920' })
+  const imgsearch = await request.get({ uri: imgurl })
   // console.log(imgsearch)
 
   const root = parse(imgsearch)

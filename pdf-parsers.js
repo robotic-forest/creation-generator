@@ -97,7 +97,7 @@ const pdfParser = async (url, options) => {
 
   return {
     text: parsedPDF.text,
-    keywords: findKeyWords(parsedPDF.text)
+    keywords: findKeyWords(parsedPDF.text).slice(0, options?.keywordNum || 6)
   }
 
 }
