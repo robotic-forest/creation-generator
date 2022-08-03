@@ -1,63 +1,104 @@
 const request = require('request-promise-native')
 const pdf = require('pdf-parse')
-const PdfExtractor = require('pdf-extractor').PdfExtractor
-var path = require('path')
+const path = require('path')
+const fs = require('fs');
+const { extractPDFImages } = require('./extract-images');
+
+const stickyWords =[
+  "the", "we", "2", "their",
+  "there", '1', 'an', '3', 'we',
+  "by", 'more', 'have', 'with',
+  "at", 'which', 'such', 'they', 'all',
+  "and", 'times', '25', 'from', 'p',
+  "so", 'through', 'some', 'most',
+  "if", 'since', 'these', 'one',
+  "than", 'ha', 'b', 'hi',
+  "but",
+  "about",
+  "in",
+  "on",
+  "the",
+  "was",
+  "for",
+  "that",
+  "said",
+  "a",
+  "or",
+  "of",
+  "to",
+  "there",
+  "will",
+  "be",
+  "what",
+  "get",
+  "go",
+  "think",
+  "just",
+  "every",
+  "are",
+  "it",
+  "were",
+  "had",
+  "i",
+  "very",
+  'is', 'm', '4',
+  'as', 'vol', 'can',
+  'this', 'thi', 'wa', 'al',
+  's', ''
+]
+
+function findKeyWords(str) {
+  let words = str.toLowerCase().match(/\w+/g);
+
+  let occurances = {}
+
+  const singularWords = words.map(w => w[w.length - 1] === 's'
+    ? w.slice(0, w.length - 1)
+    : w
+  )
+
+  for (let word of singularWords) {
+    if (occurances[word]) {
+      occurances[word]++;
+    } else {
+      occurances[word] = 1;
+    }
+  }
+
+  let sortable = [];
+  for (var word in occurances) {
+      sortable.push([word, occurances[word]])
+  }
+
+  const sorted = sortable.sort(function(a, b) {
+      return b[1] - a[1];
+  })
+
+  return sortable
+    .filter(w => !stickyWords.includes(w[0]))
+    .map(w => w[0])
+}
 
 const downloadPDF = async (pdfURL) => {
   const pdfBuffer = await request.get({ uri: pdfURL, encoding: null })
   return pdfBuffer
 }
 
-function toArrayBuffer(buf) {
-  const ab = new ArrayBuffer(buf.length);
-  const view = new Uint8Array(ab);
-  for (let i = 0; i < buf.length; ++i) {
-      view[i] = buf[i];
-  }
-  return view;
-}
-
-let outputDir = path.join(__dirname, `pdf-images`)
-pdfExtractor = new PdfExtractor(outputDir, {
-    viewportScale: (width, height) => {
-        //dynamic zoom based on rendering a page to a fixed page size 
-        if (width > height) {
-            //landscape: 1100px wide
-            return 1100 / width
-        }
-        //portrait: 800px wide
-        return 800 / width
-    },
-    pageRange: [1,5],
-})
-
-const pdfParser = async () => {
-  const url = 'https://www.asjp.cerist.dz/en/downArticle/681/5/1/198472'
+const pdfParser = async (url, options) => {
   const pdfBuffer = await downloadPDF(url)
-  console.log({ pdfBuffer })
 
-  // pdf(pdfBuffer).then(data => {
- 
-  //   // number of pages
-  //   console.log(data.numpages)
-  //   // number of rendered pages
-  //   console.log(data.numrender)G
-  //   // PDF info
-  //   console.log(data.info)
-  //   // PDF metadata
-  //   console.log(data.metadata) 
-  //   // PDF.js version
-  //   // check https://mozilla.github.io/pdf.js/getting_started/
-  //   console.log(data.version)
-  //   // PDF text
-  //   console.log(data.text) 
-  // })
+  // Save locally
+  const tmpPDFPath = path.join(__dirname, `tmp/tmp.pdf`)
+  fs.writeFileSync(tmpPDFPath, pdfBuffer)
 
-  pdfExtractor.parse(toArrayBuffer(pdfBuffer)).then(function () {
-    console.log('# End of Document')
-  }).catch(function (err) {
-    console.error('Error: ' + err)
-  })
+  if (options?.extractImages) await extractPDFImages(tmpPDFPath)
+
+  const parsedPDF = await pdf(pdfBuffer)
+
+  return {
+    text: parsedPDF.text,
+    keywords: findKeyWords(parsedPDF.text)
+  }
 
 }
 
