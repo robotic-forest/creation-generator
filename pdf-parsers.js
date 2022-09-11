@@ -3,6 +3,7 @@ const pdf = require('pdf-parse')
 const path = require('path')
 const fs = require('fs');
 const { extractPDFImages } = require('./extract-images');
+const SummarizerManager = require("node-summarizer").SummarizerManager
 
 const stickyWords =[
   "the", "we", "2", "their",
@@ -93,7 +94,17 @@ const pdfParser = async (url, options) => {
 
   if (options?.extractImages) await extractPDFImages(tmpPDFPath)
 
+  // Summarize
   const parsedPDF = await pdf(pdfBuffer)
+  const number_of_sentences = 6
+  const Summarizer = new SummarizerManager(parsedPDF.text, number_of_sentences)
+  const freqsummary = Summarizer.getSummaryByFrequency().summary
+
+  const ranksummary = await Summarizer.getSummaryByRank().then((summary_object)=>{
+    return summary_object.summary
+  })
+
+  // console.log(ranksummary)
 
   return {
     text: parsedPDF.text,

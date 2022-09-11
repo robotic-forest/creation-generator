@@ -31,8 +31,7 @@ const imageSearch = async searchTerms => {
 
   console.log(links)
 
-  const index = 7
-  // for (const link of links.slice(index, index + 1)) {
+  let i = 0
   for (const link of links) {
     try {
       const html = await request.get({ uri: link })
@@ -47,12 +46,15 @@ const imageSearch = async searchTerms => {
 
       for (const img of imgs) {
         const imgBuffer = await request.get({ uri: img, encoding: null })
-        const afterLastSlashRaw = img.substring(img.lastIndexOf('/') + 1)
+        const afterLastSlashRaw = img.substring(img.lastIndexOf('.') + 1)
         const afterLastSlash = afterLastSlashRaw.includes('?')
           ? afterLastSlashRaw.split('?')[0]
           : afterLastSlashRaw
 
-        const tmpImgPath = path.join(__dirname, `tmp/gsearchimages/${afterLastSlash}`)
+        if (afterLastSlash.toLowerCase() === 'svg') continue
+
+        const imgName = `tmp/gsearchimages/img00${i + 1}.${afterLastSlash}`
+        const tmpImgPath = path.join(__dirname, imgName)
         fs.writeFileSync(tmpImgPath, imgBuffer)
 
         sizeOf(tmpImgPath, function (err, dimensions) {
@@ -62,7 +64,8 @@ const imageSearch = async searchTerms => {
           if (dimensions?.width < minWidth || dimensions?.height < minHeight) {
             fsExtra.remove(tmpImgPath)
           } else {
-            console.log(`Saved ${afterLastSlash}`)
+            console.log(`Saved ${imgName}`)
+            i++
           }
         })
       }

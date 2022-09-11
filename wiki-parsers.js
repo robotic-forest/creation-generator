@@ -1,6 +1,6 @@
 const chalk = require('chalk')
 const axios = require('axios')
-const { toSpeech } = require('./text-to-speech,js')
+const { toSpeech } = require('./text-to-speech.js')
 
 const getRandomSentenceStartMiddleEnd = ({ rawParagraphs }) => {
   // Remove everything after See also
