@@ -7,6 +7,9 @@ def chunks(lst, n):
       yield lst[i:i + n]
 
 # To setup, use https://huggingface.co/docs/transformers/installation
+
+# https://huggingface.co/facebook/bart-large-cnn
+
 text = ''
 with open('tmp/pdf-text.txt') as f:
     for line in f.readlines():
