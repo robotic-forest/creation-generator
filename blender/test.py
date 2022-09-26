@@ -4,7 +4,10 @@ import bpy
 
 # https://docs.blender.org/api/current/bpy.ops.sequencer.html
 # use --debug-wm to see more info
-# $ blender save-videos-to-vid-editor.blend --python test.py --background -- butts
+# $ blender blender/save-videos-to-vid-editor.blend --python blender/test.py --background -- render
+
+# on wsl2, run 
+# $ ./win-create.sh --bg render
 
 def clean_sequencer(sequence_context):
     bpy.ops.sequencer.select_all(sequence_context, action="SELECT")
@@ -26,23 +29,31 @@ def hex_to_rgb(hex):
     return tuple(int(hex[i:i+hlen//3], 16)/256 for i in range(0, hlen, hlen//3))
 
 # add images to the blender sequence editor
-def add_images_to_sequence_editor():
+def main():
     sequence_editors = find_sequence_editors()
     
     clean_sequencer(sequence_editors[0])
 
-    print(sys.argv)
+    render = False
+    output_path = "/home/tlaloc/projects/protocodex/creation-generator/blender/render/test"
+    input_dir = "/home/tlaloc/projects/protocodex/creation-generator/tmp/gsearchimages/"
 
     # interpret the arguments after --
     for arg in sys.argv[sys.argv.index("--") + 1:]:
-        print(arg)
+        if arg == "is_wsl":
+            print("is wsl!")
+            output_path = "\\\\wsl$\Debian\home\enki\Projects\Protocodex\creation-generator\\blender\\render\\test"
+            input_dir = "\\\\wsl$\Debian\home\enki\Projects\Protocodex\creation-generator\\tmp\\gsearchimages"
+        if arg == "render":
+            render = True
+     
+    bpy.context.scene.render.filepath = output_path
     
-    input_dir = "/home/tlaloc/projects/protocodex/creation-generator/tmp/gsearchimages/"
     filenames = os.listdir(input_dir)
     
     frames_per_image = 20
     transform_amount = 0.9
-    image_amount = 2
+    image_amount = 10
     # image_amount = len(filenames)
     background_color='#000000'
     titled = False 
@@ -69,7 +80,7 @@ def add_images_to_sequence_editor():
             }],
             relative_path=True,
             show_multiview=False,
-            frame_start=1 + frames_per_image * i,
+            frame_start=frames_per_image * i,
             frame_end=frames_per_image + frames_per_image * i,
             channel=2,
             fit_method='FIT',
@@ -90,13 +101,9 @@ def add_images_to_sequence_editor():
                     
         sequence.transform.scale_x = transform_amount * sequence.transform.scale_x
         sequence.transform.scale_y = transform_amount * sequence.transform.scale_y
-        
-    
-def main():
-    add_images_to_sequence_editor()
 
-    bpy.ops.render.render(animation=True)
-
+    if render:
+        bpy.ops.render.render(animation=True)
 
 if __name__ == "__main__":
     main()
