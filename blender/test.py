@@ -1,6 +1,8 @@
 import os
 import sys
 import bpy
+import cv2
+import numpy as np
 
 # https://docs.blender.org/api/current/bpy.ops.sequencer.html
 # use --debug-wm to see more info
@@ -39,13 +41,15 @@ def main():
     input_dir = "/home/tlaloc/projects/protocodex/creation-generator/tmp/gsearchimages/"
 
     # interpret the arguments after --
-    for arg in sys.argv[sys.argv.index("--") + 1:]:
-        if arg == "is_wsl":
-            print("is wsl!")
-            output_path = "\\\\wsl$\Debian\home\enki\Projects\Protocodex\creation-generator\\blender\\render\\test"
-            input_dir = "\\\\wsl$\Debian\home\enki\Projects\Protocodex\creation-generator\\tmp\\gsearchimages"
-        if arg == "render":
-            render = True
+    # check if -- is in sys.argv
+    if "--" in sys.argv:
+        for arg in sys.argv[sys.argv.index("--") + 1:]:
+            if arg == "is_wsl":
+                print("is wsl!")
+                output_path = "\\\\wsl$\Debian\home\enki\Projects\Protocodex\creation-generator\\blender\\render\\test"
+                input_dir = "\\\\wsl$\Debian\home\enki\Projects\Protocodex\creation-generator\\tmp\\gsearchimages"
+            if arg == "render":
+                render = True
      
     bpy.context.scene.render.filepath = output_path
     
