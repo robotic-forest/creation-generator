@@ -1,8 +1,6 @@
 import os
 import sys
 import bpy
-import cv2
-import numpy as np
 
 # https://docs.blender.org/api/current/bpy.ops.sequencer.html
 # use --debug-wm to see more info
