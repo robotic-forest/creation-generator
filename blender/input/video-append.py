@@ -1,13 +1,20 @@
 import os
 import sys
 import bpy
+from pprint import pprint
 
 # https://docs.blender.org/api/current/bpy.ops.sequencer.html
 # use --debug-wm to see more info
 # $ blender blender/save-videos-to-vid-editor.blend --python blender/test.py --background -- render
 
-# on wsl2, run 
+# on wsl2
+# if running test, make sure to toggle comments in ./win-create
 # $ ./win-create.sh --bg render
+
+#if not testing
+# $ ./win-create.sh lost-worlds.blend --bg render
+
+# ~/Projects/Protocodex/creation-generator/win-create.sh lost-worlds-copy.blend
 
 def clean_sequencer(sequence_context):
     bpy.ops.sequencer.select_all(sequence_context, action="SELECT")
@@ -32,11 +39,15 @@ def hex_to_rgb(hex):
 def main():
     sequence_editors = find_sequence_editors()
     
-    clean_sequencer(sequence_editors[0])
+    # clean_sequencer(sequence_editors[0])
+
+    # get current directory path
+    # input_folder = "Images/Forbidden Gardens Rounded/"
+    input_folder = "Images/Forbidding Gardeners Rounded/"
 
     render = False
     output_path = "/home/tlaloc/projects/protocodex/creation-generator/blender/render/test"
-    input_dir = "/home/tlaloc/projects/protocodex/creation-generator/tmp/gsearchimages/"
+    input_dir = "/home/tlaloc/projects/protocodex/creation-generator/blender/input/"  + input_folder
 
     # interpret the arguments after --
     # check if -- is in sys.argv
@@ -45,7 +56,8 @@ def main():
             if arg == "is_wsl":
                 print("is wsl!")
                 output_path = "\\\\wsl$\Debian\home\enki\Projects\Protocodex\creation-generator\\blender\\render\\test"
-                input_dir = "\\\\wsl$\Debian\home\enki\Projects\Protocodex\creation-generator\\tmp\\gsearchimages"
+                input_dir = input_folder
+                # input_dir = "\\\\wsl$\Debian\home\enki\Projects\Protocodex\creation-generator\\blender\input" + input_folder
             if arg == "render":
                 render = True
      
@@ -53,49 +65,59 @@ def main():
     
     filenames = os.listdir(input_dir)
     
-    frames_per_image = 20
+    frames_per_image = 72
     transform_amount = 0.9
-    image_amount = 10
-    # image_amount = len(filenames)
+    # image_amount = 5
+    image_amount = len(filenames)
     background_color='#000000'
-    titled = False 
+    titled = False
+    start_frame = 4582 # 1st 982
+    add_background = False
 
     # Set number of frames 
-    bpy.context.scene.frame_end = image_amount * frames_per_image
+    bpy.context.scene.frame_end = start_frame + image_amount * frames_per_image
     
     # Add background
-    bpy.ops.sequencer.effect_strip_add(
+    if add_background:
+      bpy.ops.sequencer.effect_strip_add(
         sequence_editors[0],
         type='COLOR', 
-        frame_start=1,
-        frame_end=image_amount * frames_per_image,
+        frame_start=start_frame + 1,
+        frame_end=start_frame + (image_amount * frames_per_image),
         channel=1,
         color=hex_to_rgb(background_color)
-    )
+      )
 
     for i in range(image_amount):
+        print(filenames[i])
         bpy.ops.sequencer.image_strip_add(
-            sequence_editors[0],
-            directory=input_dir,
-            files=[{
-                "name": filenames[i]
-            }],
-            relative_path=True,
-            show_multiview=False,
-            frame_start=frames_per_image * i,
-            frame_end=frames_per_image + frames_per_image * i,
-            channel=2,
-            fit_method='FIT',
-            set_view_transform=False
+          sequence_editors[0],
+          directory="//" + input_dir,
+          files=[{
+              "name": filenames[i]
+          }],
+          relative_path=True,
+          show_multiview=False,
+          frame_start=start_frame + (frames_per_image * i),
+          frame_end=start_frame + (frames_per_image + frames_per_image * i),
+          channel=2,
+          fit_method='FIT',
+          set_view_transform=False
         )
-    
 
-    for i in range(image_amount):
+        # Add transfor
+
+    for i in range(1000):
         sequence = bpy.context.scene.sequence_editor.sequences[i]
+
+        pprint(sequence.name)
 
         # if sequence type is color or effect, skip
         if sequence.type == "COLOR" or sequence.type == "EFFECT":
-            continue
+          continue
+
+        if sequence.name not in filenames:
+          continue
         
         if titled:
             transform_amount = 0.8

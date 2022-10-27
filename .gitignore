@@ -1,3 +1,7 @@
 /node_modules
 .env
 .py-env
+
+blender/input/Images
+
+*.mp4
