@@ -28,12 +28,12 @@ const parsleying = async () => {
   // console.log(proverbs)
   // write the proverbs to a file line by line synchronously
 
-  fs.writeFileSync('./tmp/proverbs.txt', proverbs.join('\n'), err => {
+  fs.writeFileSync('./files/proverbs.txt', proverbs.join('\n'), err => {
     if (err) return console.log(err);
     console.log('wrote file')
   })
 
-  const result = await bash("cat tmp/proverbs.txt")
+  const result = await bash("cat files/proverbs.txt")
   console.log(result)
 }
 
